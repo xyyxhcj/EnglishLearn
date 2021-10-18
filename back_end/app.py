@@ -2,8 +2,8 @@ import json
 
 from flask import Flask, request
 
-from back_end.db_utils import SQLHelper
-
+# from back_end.db_utils import SQLHelper
+from . import db_utils
 app = Flask(__name__)
 
 
@@ -26,13 +26,13 @@ def get_records():
     type = params['type']
     if type and isinstance(type, int):
         sql += ' and type = %s' % type
-    result, columns = SQLHelper.fetch_all(sql,(start, end))
+    result, columns = db_utils.SQLHelper.fetch_all(sql,(start, end))
     return success(result, columns)
 
 
 @app.route('/get_records_min_max_date', methods=['post'])
 def get_records_min_max_date():
-    result, columns = SQLHelper.fetch_all('select min(er.learn_date),max(er.learn_date) from en_records er limit 1', ())
+    result, columns = db_utils.SQLHelper.fetch_all('select min(er.learn_date),max(er.learn_date) from en_records er limit 1', ())
     return success(result, columns)
 
 
