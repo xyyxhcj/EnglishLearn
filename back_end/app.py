@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, request
 
-from back_end.db_utils import SQLHelper
+from db_utils import SQLHelper
 
 app = Flask(__name__)
 
