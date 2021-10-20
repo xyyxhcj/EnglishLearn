@@ -47,7 +47,7 @@ export default {
   name: "Records",
   setup() {
     const reqParameter = ref({
-      type: CONSTS.RECORDS_TYPE.SUFFIX,
+      type: null,
       start: null,
       end: null
     });
