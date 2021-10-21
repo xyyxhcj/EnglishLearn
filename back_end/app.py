@@ -1,5 +1,5 @@
 import json
-
+import logging
 from flask import Flask, request
 from dbutils.pooled_db import PooledDB
 import sqlite3
@@ -7,6 +7,8 @@ import sqlite3
 import os.path
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def success(data, columns):
@@ -65,7 +67,8 @@ def hello_world():  # put application's code here
 @app.route('/get_records', methods=['post'])
 def get_records():
     params = request.get_json()  # {'type': 2, 'start': '2021/10/13', 'end': '2021/10/15'}
-    print(params)
+    # print(params)
+    logger.info(params)
     start = params['start'] if params['start'] else '2000-01-01'
     end = params['end'] if params['end'] else '2100-01-01'
     sql = 'select * from en_records where learn_date >=? and learn_date <=? '
