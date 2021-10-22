@@ -11,11 +11,16 @@
   <van-collapse v-model="activeNames">
     <van-collapse-item v-for="(data,key) in dataList" :key="key" :name="key">
       <template #title>
-        <van-tag type="primary">{{ key+1 }}</van-tag>
-        {{data[2]}}
+        <van-tag type="primary">{{ key + 1 }}</van-tag>
+        {{ data[2] }}
       </template>
       {{ data[3] }}
-      <van-cell center title="Show Example">
+      <van-cell center>
+        <template #title>
+          <span class="title">Show Example</span>
+          <van-icon name="play-circle-o" v-if="!audioList[key].isPlay" @click="onPlay(key)"/>
+          <van-icon name="stop-circle-o" v-else @click="onStop"/>
+        </template>
         <template #right-icon>
           <van-switch v-model="showExamples[key]" size="24"/>
         </template>
@@ -33,34 +38,70 @@
                 :max-date="recordMaxDate" :allow-same-day="true" :default-date="null"/>
   <van-overlay :show="loading">
     <div class="wrapper">
-      <van-loading type="spinner" color="#1989fa" />
+      <van-loading type="spinner" color="#1989fa"/>
     </div>
   </van-overlay>
 </template>
 
 <script>
 import {ref} from "vue";
-import CONSTS from "@/common/consts";
 import {post} from "@/common/request";
 import UTILS from "@/common/utils";
 
 export default {
   name: "Records",
   setup() {
+    const YD_AUDIO_PRE = 'http://dict.youdao.com/dictvoice?type=0&audio=';
+    const PLAY_AUDIO = new Audio();
+    PLAY_AUDIO.preload = true;
+    PLAY_AUDIO.controls = true;
+    PLAY_AUDIO.loop = false;
+    let CURRENT_PLAY_KEY = -1;
+    const CURR_PLAY_LIST = ref([]);
+    // control each button of play
+    const audioList = ref([]);
+
+    function stopPlay() {
+      PLAY_AUDIO.removeEventListener('ended', playEndedHandler, false);
+      PLAY_AUDIO.pause();
+      if (CURRENT_PLAY_KEY === -1) {
+        return;
+      }
+      audioList.value[CURRENT_PLAY_KEY].isPlay = false;
+      CURRENT_PLAY_KEY = -1;
+    }
+
+    function playEndedHandler() {
+      if (!CURR_PLAY_LIST.value.length) {
+        stopPlay();
+        return;
+      }
+      PLAY_AUDIO.src = CURR_PLAY_LIST.value.shift();
+      PLAY_AUDIO.play();
+    }
+
+    function funcFormatDate(date) {
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    // set default select
+    let now = new Date();
+    let start = new Date(new Date().setDate(now.getDate() - 2));
+    const selectDataText = ref('');
     const reqParameter = ref({
       type: null,
-      start: null,
-      end: null
+      start: start.toLocaleDateString().replace(/\//g, "-"),
+      end: now.toLocaleDateString().replace(/\//g, "-")
     });
+    selectDataText.value = `${funcFormatDate(start)} - ${funcFormatDate(now)}`;
 
     const recordsTypeOption = [
       {text: 'All', value: null},
       {text: 'Suffix', value: 1},
       {text: 'Prefix', value: 2},
     ];
-    const selectDataText = ref('');
+
     const showSelectDate = ref(false);
-    const funcFormatDate = (date) => `${date.getMonth() + 1}/${date.getDate()}`;
 
     const dataList = ref([]);
     const activeNames = ref([]);
@@ -71,7 +112,16 @@ export default {
       UTILS.shuffle(dataList.value);
       activeNames.value.length = 0;
       showExamples.value.length = 0;
-      dataList.value.forEach(() => showExamples.value.push(false));
+      audioList.value.length = 0;
+      dataList.value.forEach((data) => {
+        showExamples.value.push(false);
+        let exampleWordPlays = [];
+        data[4].split(';').forEach(example => {
+          exampleWordPlays.push(YD_AUDIO_PRE + example.trim().split(' ')[0]);
+        })
+        audioList.value.push({isPlay: false, list: exampleWordPlays});
+      });
+
     }
 
     const onFlushDataList = () => {
@@ -90,13 +140,34 @@ export default {
       onFlushDataList();
     };
 
+    const onPlay = (key) => {
+      if (CURRENT_PLAY_KEY !== -1) {
+        // stop the old
+        stopPlay();
+      }
+      let selectAudioObj = audioList.value[key];
+      if (!selectAudioObj.list || selectAudioObj.list.length === 0) {
+        return;
+      }
+
+      // sign the key
+      CURRENT_PLAY_KEY = key;
+      selectAudioObj.isPlay = true;
+      CURR_PLAY_LIST.value = selectAudioObj.list.slice(0);
+      PLAY_AUDIO.src = CURR_PLAY_LIST.value.shift();
+      PLAY_AUDIO.addEventListener('ended', playEndedHandler, false);
+
+      PLAY_AUDIO.play();
+    }
+
+    const onStop = () => {
+      stopPlay();
+    }
     // get recordMinDate & recordMaxDate
-    let now = new Date();
     const recordMinDate = ref(now);
     const recordMaxDate = ref(now);
     post('/get_records_min_max_date').then(resp => {
       [recordMinDate.value, recordMaxDate.value] = [new Date(resp.data[0][0]), new Date(resp.data[0][1])];
-      selectDataText.value = `${funcFormatDate(recordMinDate.value)} - ${funcFormatDate(recordMaxDate.value)}`;
     })
 
     onFlushDataList();
@@ -111,10 +182,13 @@ export default {
       dataList,
       activeNames,
       showExamples,
+      audioList,
       loading,
       onShuffle,
       onFlushDataList,
       onConfirmSelectDate,
+      onPlay,
+      onStop,
     };
   }
 }
@@ -126,6 +200,10 @@ export default {
   align-items: center;
   justify-content: center;
   height: 100%;
+}
+
+.title {
+  padding-right: 15px;
 }
 
 .save-insert-bottom_25 {
