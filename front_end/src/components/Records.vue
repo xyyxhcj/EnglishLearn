@@ -7,7 +7,6 @@
         <van-button type="danger" size="small" @click="onShuffle">Shuffle</van-button>
       </template>
     </van-dropdown-item>
-
   </van-dropdown-menu>
   <van-collapse v-model="activeNames">
     <van-collapse-item v-for="(data,key) in dataList" :key="key" :name="key">
@@ -28,6 +27,8 @@
       </div>
     </van-collapse-item>
   </van-collapse>
+
+  <div class="save-insert-bottom_25"/>
   <van-calendar v-model:show="showSelectDate" type="range" @confirm="onConfirmSelectDate" :min-date="recordMinDate"
                 :max-date="recordMaxDate" :allow-same-day="true" :default-date="null"/>
   <van-overlay :show="loading">
@@ -95,6 +96,7 @@ export default {
     const recordMaxDate = ref(now);
     post('/get_records_min_max_date').then(resp => {
       [recordMinDate.value, recordMaxDate.value] = [new Date(resp.data[0][0]), new Date(resp.data[0][1])];
+      selectDataText.value = `${funcFormatDate(recordMinDate.value)} - ${funcFormatDate(recordMaxDate.value)}`;
     })
 
     onFlushDataList();
@@ -124,6 +126,10 @@ export default {
   align-items: center;
   justify-content: center;
   height: 100%;
+}
+
+.save-insert-bottom_25 {
+  height: 25px;
 }
 
 </style>
