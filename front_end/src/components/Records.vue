@@ -200,10 +200,6 @@ export default {
   height: 100%;
 }
 
-.title {
-  padding-right: 15px;
-}
-
 .play-btn {
   margin-right: 25px;
 }
