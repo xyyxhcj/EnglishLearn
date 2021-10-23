@@ -15,13 +15,11 @@
         {{ data[2] }}
       </template>
       {{ data[3] }}
-      <van-cell center>
-        <template #title>
-          <span class="title">Show Example</span>
-          <van-icon name="play-circle-o" v-if="!audioList[key].isPlay" @click="onPlay(key)"/>
-          <van-icon name="stop-circle-o" v-else @click="onStop"/>
-        </template>
+      <van-cell center title="Show Example">
         <template #right-icon>
+          <van-button type="success" icon="play-circle-o" round size="mini" plain class="play-btn" @click="onPlay(key)"
+                      v-if="!audioList[key].isPlay"/>
+          <van-button icon="stop-circle-o" round size="mini" plain class="play-btn" @click="onStop" v-else/>
           <van-switch v-model="showExamples[key]" size="24"/>
         </template>
       </van-cell>
@@ -204,6 +202,10 @@ export default {
 
 .title {
   padding-right: 15px;
+}
+
+.play-btn {
+  margin-right: 25px;
 }
 
 .save-insert-bottom_25 {
