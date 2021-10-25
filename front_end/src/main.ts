@@ -12,6 +12,7 @@ import {
     DropdownMenu,
     DropdownItem,
     Icon,
+    Image as VanImage,
     Loading,
     Overlay,
     Switch,
@@ -25,6 +26,7 @@ import 'vant/es/collapse-item/style';
 import 'vant/es/dropdown-menu/style';
 import 'vant/es/dropdown-item/style';
 import 'vant/es/icon/style';
+import 'vant/es/image/style';
 import 'vant/es/loading/style';
 import 'vant/es/overlay/style';
 import 'vant/es/switch/style';
@@ -45,6 +47,7 @@ createApp(App)
     .use(DropdownMenu)
     .use(DropdownItem)
     .use(Icon)
+    .use(VanImage)
     .use(Loading)
     .use(Overlay)
     .use(Switch)

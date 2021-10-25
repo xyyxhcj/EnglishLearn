@@ -14,6 +14,7 @@
         <van-tag type="primary">{{ key + 1 }}</van-tag>
         {{ data[2] }}
       </template>
+      <van-image width="100" :src="data[6]" v-if="data[6]"/>
       {{ data[3] }}
       <van-cell center title="Show Example">
         <template #right-icon>
@@ -97,6 +98,7 @@ export default {
       {text: 'All', value: null},
       {text: 'Suffix', value: 1},
       {text: 'Prefix', value: 2},
+      {text: 'Root', value: 3},
     ];
 
     const showSelectDate = ref(false);
