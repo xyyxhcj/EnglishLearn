@@ -117,7 +117,11 @@ export default {
         showExamples.value.push(false);
         let exampleWordPlays = [];
         data[4].split(';').forEach(example => {
-          exampleWordPlays.push(YD_AUDIO_PRE + example.trim().split(' ')[0]);
+          let splitElement = example.trim().split(' ')[0];
+          if (splitElement === '') {
+            return;
+          }
+          exampleWordPlays.push(YD_AUDIO_PRE + splitElement);
         })
         audioList.value.push({isPlay: false, list: exampleWordPlays});
       });
