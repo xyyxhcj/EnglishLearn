@@ -18,9 +18,9 @@
       {{ data[3] }}
       <van-cell center title="Show Example">
         <template #right-icon>
-          <van-button type="success" icon="play-circle-o" round size="mini" plain class="play-btn" @click="onPlay(key)"
+          <van-button type="success" icon="play-circle-o" round plain class="play-btn" @click="onPlay(key)"
                       v-if="!audioList[key].isPlay"/>
-          <van-button icon="stop-circle-o" round size="mini" plain class="play-btn" @click="onStop" v-else/>
+          <van-button icon="stop-circle-o" round plain class="play-btn" @click="onStop" v-else/>
           <van-switch v-model="showExamples[key]" size="24"/>
         </template>
       </van-cell>
