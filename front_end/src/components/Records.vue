@@ -26,7 +26,8 @@
       </van-cell>
       <div v-show="showExamples[key]" style="font-size: 16px!important">
         <li v-for="(example,i) in data[4].split(';')">
-          {{ example }}
+          <span class="word">{{audioList[key].wordList[i]}}</span>
+          {{audioList[key].descList[i]}}
         </li>
       </div>
     </van-collapse-item>
@@ -116,14 +117,19 @@ export default {
       dataList.value.forEach((data) => {
         showExamples.value.push(false);
         let exampleWordPlays = [];
+        let wordList = [];
+        let descList = [];
         data[4].split(';').forEach(example => {
-          let splitElement = example.trim().split(' ')[0];
+          let trim = example.trim();
+          let splitElement = trim.split(' ')[0];
+          wordList.push(splitElement);
+          descList.push(trim.substring(splitElement.length));
           if (splitElement === '') {
             return;
           }
           exampleWordPlays.push(YD_AUDIO_PRE + splitElement);
         })
-        audioList.value.push({isPlay: false, list: exampleWordPlays});
+        audioList.value.push({isPlay: false, list: exampleWordPlays,wordList:wordList, descList: descList});
       });
 
     }
@@ -212,6 +218,12 @@ export default {
 
 .save-insert-bottom_25 {
   height: 25px;
+}
+
+.word {
+  font-family: '微软雅黑',serif;
+  font-size: 22px;
+  font-weight: bold;
 }
 
 </style>
