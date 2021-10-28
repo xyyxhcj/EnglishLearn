@@ -34,7 +34,7 @@
 
   <div class="save-insert-bottom_25"/>
   <van-calendar v-model:show="showSelectDate" type="range" @confirm="onConfirmSelectDate" :min-date="recordMinDate"
-                :max-date="recordMaxDate" :allow-same-day="true" :default-date="null"/>
+                :max-date="recordMaxDate" :allow-same-day="true" :default-date="null" :first-day-of-week="1"/>
   <van-overlay :show="loading">
     <div class="wrapper">
       <van-loading type="spinner" color="#1989fa"/>
