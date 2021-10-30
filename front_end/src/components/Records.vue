@@ -27,7 +27,10 @@
       <div v-show="showExamples[key]" style="font-size: 16px!important">
         <li v-for="(example,i) in data[4].split(';')">
           <span class="word">{{audioList[key].wordList[i]}}</span>
-          {{audioList[key].descList[i]}}
+          <van-switch v-model="audioList[key].descList[i].isShow" size="20px" class="desc-switch"/>
+          <van-skeleton title :loading="!audioList[key].descList[i].isShow">
+            <div>{{audioList[key].descList[i]?.desc}}</div>
+          </van-skeleton>
         </li>
       </div>
     </van-collapse-item>
@@ -123,7 +126,7 @@ export default {
           let trim = example.trim();
           let splitElement = trim.split(' ')[0];
           wordList.push(splitElement);
-          descList.push(trim.substring(splitElement.length));
+          descList.push({desc:trim.substring(splitElement.length), isShow: false});
           if (splitElement === '') {
             return;
           }
@@ -224,6 +227,9 @@ export default {
   font-family: '微软雅黑',serif;
   font-size: 22px;
   font-weight: bold;
+  margin-right: 5px;
 }
-
+.desc-switch {
+  top: 2px;
+}
 </style>

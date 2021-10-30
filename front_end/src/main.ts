@@ -15,6 +15,7 @@ import {
     Image as VanImage,
     Loading,
     Overlay,
+    Skeleton,
     Switch,
     Tag
 } from 'vant';
@@ -29,6 +30,7 @@ import 'vant/es/icon/style';
 import 'vant/es/image/style';
 import 'vant/es/loading/style';
 import 'vant/es/overlay/style';
+import 'vant/es/skeleton/style';
 import 'vant/es/switch/style';
 import 'vant/es/tag/style';
 
@@ -50,6 +52,7 @@ createApp(App)
     .use(VanImage)
     .use(Loading)
     .use(Overlay)
+    .use(Skeleton)
     .use(Switch)
     .use(Tag)
     .mount('#app');
