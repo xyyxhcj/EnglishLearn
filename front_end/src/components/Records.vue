@@ -25,6 +25,7 @@
         </template>
       </van-cell>
       <div v-show="showExamples[key]" style="font-size: 16px!important">
+        <van-button icon="eye-o" round @click="onShowAllDesc(key)" size="small"/>
         <li v-for="(example,i) in data[4].split(';')">
           <span class="word">{{audioList[key].wordList[i]}}</span>
           <van-switch v-model="audioList[key].descList[i].isShow" size="20px" class="desc-switch"/>
@@ -173,6 +174,14 @@ export default {
       PLAY_AUDIO.play();
     }
 
+    const onShowAllDesc = (key) => {
+      let selectAudioObj = audioList.value[key];
+      if (!selectAudioObj.list || selectAudioObj.list.length === 0 || !selectAudioObj.descList) {
+        return;
+      }
+      selectAudioObj.descList.forEach(desc => desc.isShow = true);
+    }
+
     const onStop = () => {
       stopPlay();
     }
@@ -202,6 +211,7 @@ export default {
       onConfirmSelectDate,
       onPlay,
       onStop,
+      onShowAllDesc,
     };
   }
 }
