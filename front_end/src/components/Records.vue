@@ -51,6 +51,7 @@
 import {ref} from "vue";
 import {post} from "@/common/request";
 import UTILS from "@/common/utils";
+import DATE_UTILS from "@/common/dateUtils";
 
 export default {
   name: "Records",
@@ -88,14 +89,18 @@ export default {
       return `${date.getMonth() + 1}/${date.getDate()}`;
     }
 
+    function funcGetPatternDate(date) {
+      return DATE_UTILS.formatDate(date.getTime())
+    }
+
     // set default select
     let now = new Date();
     let start = new Date(new Date().setDate(now.getDate() - 2));
     const selectDataText = ref('');
     const reqParameter = ref({
       type: null,
-      start: start.toLocaleDateString().replace(/\//g, "-"),
-      end: now.toLocaleDateString().replace(/\//g, "-")
+      start: funcGetPatternDate(start),
+      end: funcGetPatternDate(now)
     });
     selectDataText.value = `${funcFormatDate(start)} - ${funcFormatDate(now)}`;
 
@@ -148,8 +153,8 @@ export default {
 
     const onConfirmSelectDate = (values) => {
       showSelectDate.value = false;
-      reqParameter.value.start = values[0].toLocaleDateString().replace(/\//g, "-");
-      reqParameter.value.end = values[1].toLocaleDateString().replace(/\//g, "-");
+      reqParameter.value.start = funcGetPatternDate(values[0]);
+      reqParameter.value.end = funcGetPatternDate(values[1]);
       selectDataText.value = `${funcFormatDate(values[0])} - ${funcFormatDate(values[1])}`;
       onFlushDataList();
     };
