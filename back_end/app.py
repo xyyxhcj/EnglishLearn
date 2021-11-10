@@ -58,6 +58,14 @@ class SQLHelper(object):
         cls.close(conn, cursor)
         return result, columns_list
 
+    @classmethod
+    def update(cls, sql, args):
+        conn = POOL.connection(shareable=False)
+        cursor = conn.cursor()
+        cursor.execute(sql, args)
+        conn.commit()
+        cls.close(conn, cursor)
+
 
 @app.route('/')
 def hello_world():  # put application's code here
