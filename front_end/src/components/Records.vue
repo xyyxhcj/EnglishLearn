@@ -145,7 +145,7 @@ export default {
           list: exampleWordPlays,
           wordList: wordList,
           descList: descList,
-          phoneticList: data[7].split(';')
+          phoneticList: data[7].split('|')
         });
       });
 

@@ -44,7 +44,7 @@ def add_phonetic_symbol():
             phonetic_symbol = get_phonetic_symbol(example[0])
             phones.append(phonetic_symbol)
             time.sleep(1)
-        SQLHelper.update(update_sql, (';'.join(phones), rid))
+        SQLHelper.update(update_sql, ('|'.join(phones), rid))
         print('succeeded! id: %s' % (rid,))
 
 
