@@ -179,11 +179,10 @@ export default {
 
       // sign the key
       CURRENT_PLAY_KEY = key;
-      selectAudioObj.isPlay = true;
       CURR_PLAY_LIST.value = selectAudioObj.list.slice(0);
       PLAY_AUDIO.src = CURR_PLAY_LIST.value.shift();
       PLAY_AUDIO.addEventListener('ended', playEndedHandler, false);
-
+      selectAudioObj.isPlay = true;
       PLAY_AUDIO.play();
     }
 
