@@ -29,7 +29,12 @@
         <li v-for="(example,i) in data[4].split(';')">
           <span class="word">{{ audioList[key].wordList[i] }}</span>
           <van-switch v-model="audioList[key].descList[i].isShow" size="20px" class="desc-switch"/>
-          <span>{{audioList[key].phoneticList[i]}}</span>
+          <span class="phonetic-symbol">
+            <van-button plain round type="primary" @click="onPlaySingle(audioList[key].wordList[i],j)" size="mini"
+                        v-for="(phonetic,j) in audioList[key].phoneticList[i].trim().split('/ /')">
+              {{ phonetic.replace('/', '') }}
+            </van-button>
+          </span>
           <van-skeleton title :loading="!audioList[key].descList[i].isShow">
             <div>{{ audioList[key].descList[i]?.desc }}</div>
           </van-skeleton>
@@ -58,6 +63,7 @@ export default {
   name: "Records",
   setup() {
     const YD_AUDIO_PRE = 'http://dict.youdao.com/dictvoice?type=0&audio=';
+    const YD_EN_AUDIO_PRE = 'http://dict.youdao.com/dictvoice?type=1&audio=';
     const PLAY_AUDIO = new Audio();
     PLAY_AUDIO.preload = true;
     PLAY_AUDIO.controls = true;
@@ -186,6 +192,16 @@ export default {
       PLAY_AUDIO.play();
     }
 
+    const onPlaySingle = (word, j) => {
+      if (CURRENT_PLAY_KEY !== -1) {
+        // stop the old
+        stopPlay();
+      }
+      let audioPre = j === 0 ? YD_EN_AUDIO_PRE : YD_AUDIO_PRE;
+      PLAY_AUDIO.src = audioPre + word;
+      PLAY_AUDIO.play();
+    }
+
     const onShowAllDesc = (key) => {
       let selectAudioObj = audioList.value[key];
       if (!selectAudioObj.list || selectAudioObj.list.length === 0 || !selectAudioObj.descList) {
@@ -222,6 +238,7 @@ export default {
       onFlushDataList,
       onConfirmSelectDate,
       onPlay,
+      onPlaySingle,
       onStop,
       onShowAllDesc,
     };
@@ -254,5 +271,10 @@ export default {
 
 .desc-switch {
   top: 2px;
+}
+
+.phonetic-symbol {
+  font-size: 12px;
+  display: flex;
 }
 </style>
