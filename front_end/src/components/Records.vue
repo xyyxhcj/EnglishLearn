@@ -30,7 +30,7 @@
           <span class="word">{{ audioList[key].wordList[i] }}</span>
           <van-switch v-model="audioList[key].descList[i].isShow" size="20px" class="desc-switch"/>
           <span class="phonetic-symbol">
-            <van-button plain round type="primary" @click="onPlaySingle(audioList[key].wordList[i],j)" size="mini"
+            <van-button :plain="CURRENT_PLAY_WORD!==audioList[key].wordList[i]+j" round type="primary" @click="onPlaySingle(audioList[key].wordList[i],j)" size="mini"
                         v-for="(phonetic,j) in audioList[key].phoneticList[i].trim().split('/ /')">
               {{ phonetic.replace('/', '') }}
             </van-button>
@@ -67,8 +67,8 @@ export default {
     const PLAY_AUDIO = new Audio();
     PLAY_AUDIO.preload = true;
     PLAY_AUDIO.controls = true;
-    PLAY_AUDIO.loop = false;
     let CURRENT_PLAY_KEY = -1;
+    let CURRENT_PLAY_WORD = ref('');
     const CURR_PLAY_LIST = ref([]);
     // control each button of play
     const audioList = ref([]);
@@ -76,11 +76,13 @@ export default {
     function stopPlay() {
       PLAY_AUDIO.removeEventListener('ended', playEndedHandler, false);
       PLAY_AUDIO.pause();
-      if (CURRENT_PLAY_KEY === -1) {
-        return;
+      if (CURRENT_PLAY_KEY !== -1) {
+        audioList.value[CURRENT_PLAY_KEY].isPlay = false;
+        CURRENT_PLAY_KEY = -1;
       }
-      audioList.value[CURRENT_PLAY_KEY].isPlay = false;
-      CURRENT_PLAY_KEY = -1;
+      if (CURRENT_PLAY_WORD.value !== '') {
+        CURRENT_PLAY_WORD.value = '';
+      }
     }
 
     function playEndedHandler() {
@@ -174,7 +176,7 @@ export default {
     };
 
     const onPlay = (key) => {
-      if (CURRENT_PLAY_KEY !== -1) {
+      if (CURRENT_PLAY_KEY !== -1 || CURRENT_PLAY_WORD.value !== '') {
         // stop the old
         stopPlay();
       }
@@ -184,21 +186,28 @@ export default {
       }
 
       // sign the key
-      CURRENT_PLAY_KEY = key;
       CURR_PLAY_LIST.value = selectAudioObj.list.slice(0);
       PLAY_AUDIO.src = CURR_PLAY_LIST.value.shift();
       PLAY_AUDIO.addEventListener('ended', playEndedHandler, false);
+      PLAY_AUDIO.loop = false;
       selectAudioObj.isPlay = true;
+      CURRENT_PLAY_KEY = key;
       PLAY_AUDIO.play();
     }
 
     const onPlaySingle = (word, j) => {
-      if (CURRENT_PLAY_KEY !== -1) {
+      let currPlay = CURRENT_PLAY_WORD.value;
+      if (CURRENT_PLAY_KEY !== -1 || currPlay !== '') {
         // stop the old
         stopPlay();
       }
+      if (currPlay === word + j) {
+        return;
+      }
       let audioPre = j === 0 ? YD_EN_AUDIO_PRE : YD_AUDIO_PRE;
       PLAY_AUDIO.src = audioPre + word;
+      PLAY_AUDIO.loop = true;
+      CURRENT_PLAY_WORD.value = word + j;
       PLAY_AUDIO.play();
     }
 
@@ -223,6 +232,7 @@ export default {
     onFlushDataList();
 
     return {
+      CURRENT_PLAY_WORD,
       recordsTypeOption,
       selectDataText,
       showSelectDate,
