@@ -1,5 +1,5 @@
 <template>
-  <van-cell title="Select Date Range" :value="selectDataText" @click="showSelectDate = true"/>
+  <van-cell title="Select List" :value="listOptionsPopup.selectedStr" @click="listOptionsPopup.show = true" required/>
   <van-dropdown-menu>
     <van-dropdown-item v-model="reqParameter.type" :options="recordsTypeOption" @change="onFlushDataList"/>
     <van-dropdown-item :disabled="true">
@@ -30,7 +30,8 @@
           <span class="word">{{ audioList[key].wordList[i] }}</span>
           <van-switch v-model="audioList[key].descList[i].isShow" size="20px" class="desc-switch"/>
           <span class="phonetic-symbol">
-            <van-button :plain="CURRENT_PLAY_WORD!==audioList[key].wordList[i]+j" round type="primary" @click="onPlaySingle(audioList[key].wordList[i],j)" size="mini"
+            <van-button :plain="CURRENT_PLAY_WORD!==audioList[key].wordList[i]+j" round type="primary"
+                        @click="onPlaySingle(audioList[key].wordList[i],j)" size="mini"
                         v-for="(phonetic,j) in audioList[key].phoneticList[i].trim().split('/ /')">
               {{ phonetic.replace('/', '') }}
             </van-button>
@@ -44,20 +45,41 @@
   </van-collapse>
 
   <div class="save-insert-bottom_25"/>
-  <van-calendar v-model:show="showSelectDate" type="range" @confirm="onConfirmSelectDate" :min-date="recordMinDate"
-                :max-date="recordMaxDate" :allow-same-day="true" :default-date="null" :first-day-of-week="1"/>
   <van-overlay :show="loading">
     <div class="wrapper">
       <van-loading type="spinner" color="#1989fa"/>
     </div>
   </van-overlay>
+
+  <van-popup v-model:show="listOptionsPopup.show" position="top" safe-area-inset-bottom class="popup-wrapper"
+             transition-appear close-on-popstate>
+    <div class="content-wrapper">
+      <van-checkbox-group v-model="reqParameter.list" ref="checkboxGroup">
+        <van-cell-group inset>
+          <van-cell v-for="(item, index) in listOptionsPopup.options" clickable
+                    :key="item[0]" :title="`List ${item[1]} ${item[2]}`" @click="checkboxToggle(index)">
+            <template #right-icon>
+              <van-checkbox
+                  :name="item[0]" :ref="el => listOptionsPopup.checkboxRefs[index] = el" @click.stop/>
+            </template>
+          </van-cell>
+        </van-cell-group>
+      </van-checkbox-group>
+    </div>
+    <van-action-bar>
+      <van-action-bar-button type="warning" text="Cancel" @click="listOptionsPopup.show=false" />
+      <van-action-bar-button text="Check All" @click="checkAll" />
+      <van-action-bar-button text="Toggle All" @click="toggleAll" />
+      <van-action-bar-button type="primary" text="OK" @click="onConfirmSelectList" />
+    </van-action-bar>
+  </van-popup>
 </template>
 
 <script>
-import {ref} from "vue";
+import {ref, reactive} from "vue";
 import {post} from "@/common/request";
 import UTILS from "@/common/utils";
-import DATE_UTILS from "@/common/dateUtils";
+import {Toast} from "vant";
 
 export default {
   name: "Records",
@@ -67,11 +89,18 @@ export default {
     const PLAY_AUDIO = new Audio();
     PLAY_AUDIO.preload = true;
     PLAY_AUDIO.controls = true;
+
     let CURRENT_PLAY_KEY = -1;
     let CURRENT_PLAY_WORD = ref('');
     const CURR_PLAY_LIST = ref([]);
     // control each button of play
     const audioList = ref([]);
+
+    const checkboxGroup = ref(null);
+    const listOptionsPopup = reactive({show: false, options: [], selectedStr: '', checkboxRefs: []});
+    const checkboxToggle = (index) => {
+      listOptionsPopup.checkboxRefs[index].toggle();
+    };
 
     function stopPlay() {
       PLAY_AUDIO.removeEventListener('ended', playEndedHandler, false);
@@ -94,24 +123,11 @@ export default {
       PLAY_AUDIO.play();
     }
 
-    function funcFormatDate(date) {
-      return `${date.getMonth() + 1}/${date.getDate()}`;
-    }
-
-    function funcGetPatternDate(date) {
-      return DATE_UTILS.formatDate(date.getTime())
-    }
-
     // set default select
-    let now = new Date();
-    let start = new Date(new Date().setDate(now.getDate() - 2));
-    const selectDataText = ref('');
     const reqParameter = ref({
       type: null,
-      start: funcGetPatternDate(start),
-      end: funcGetPatternDate(now)
+      list: []
     });
-    selectDataText.value = `${funcFormatDate(start)} - ${funcFormatDate(now)}`;
 
     const recordsTypeOption = [
       {text: 'All', value: null},
@@ -119,8 +135,6 @@ export default {
       {text: 'Prefix', value: 2},
       {text: 'Root', value: 3},
     ];
-
-    const showSelectDate = ref(false);
 
     const dataList = ref([]);
     const activeNames = ref([]);
@@ -156,22 +170,27 @@ export default {
           phoneticList: data[7].split('|')
         });
       });
-
     }
 
     const onFlushDataList = () => {
       loading.value = true;
-      post('/get_records', reqParameter.value).then(resp => {
+      post('/get_records_by_list', reqParameter.value).then(resp => {
         dataList.value = resp.data;
         onShuffle();
       }).finally(() => loading.value = false);
     }
 
-    const onConfirmSelectDate = (values) => {
-      showSelectDate.value = false;
-      reqParameter.value.start = funcGetPatternDate(values[0]);
-      reqParameter.value.end = funcGetPatternDate(values[1]);
-      selectDataText.value = `${funcFormatDate(values[0])} - ${funcFormatDate(values[1])}`;
+    const onConfirmSelectList = () => {
+      if (reqParameter.value.list.length < 1) {
+        Toast.fail('At least select one');
+        return;
+      }
+      listOptionsPopup.show = false;
+      if (reqParameter.value.list.length < 10) {
+        listOptionsPopup.selectedStr = reqParameter.value.list.join(',');
+      } else {
+        listOptionsPopup.selectedStr = reqParameter.value.list.slice(0, 9).join(',') + ' ...';
+      }
       onFlushDataList();
     };
 
@@ -222,22 +241,14 @@ export default {
     const onStop = () => {
       stopPlay();
     }
-    // get recordMinDate & recordMaxDate
-    const recordMinDate = ref(now);
-    const recordMaxDate = ref(now);
-    post('/get_records_min_max_date').then(resp => {
-      [recordMinDate.value, recordMaxDate.value] = [new Date(resp.data[0][0]), new Date(resp.data[0][1])];
-    })
-
-    onFlushDataList();
+    post('/get_lists').then(resp => listOptionsPopup.options = resp.data)
+    // onFlushDataList();
 
     return {
       CURRENT_PLAY_WORD,
       recordsTypeOption,
-      selectDataText,
-      showSelectDate,
-      recordMinDate,
-      recordMaxDate,
+      listOptionsPopup,
+      checkboxToggle,
       reqParameter,
       dataList,
       activeNames,
@@ -246,11 +257,15 @@ export default {
       loading,
       onShuffle,
       onFlushDataList,
-      onConfirmSelectDate,
+      onConfirmSelectList,
       onPlay,
       onPlaySingle,
       onStop,
       onShowAllDesc,
+
+      checkboxGroup,
+      checkAll: () => checkboxGroup.value.toggleAll(true),
+      toggleAll: () => checkboxGroup.value.toggleAll(),
     };
   }
 }
@@ -287,4 +302,19 @@ export default {
   font-size: 12px;
   display: flex;
 }
+
+.popup-wrapper {
+  overflow: hidden;
+  height: 100vh;
+  width: 100%;
+}
+
+.content-wrapper {
+  height: 94vh;
+}
+
+.bottom-btn {
+  height: 6vh;
+}
+
 </style>

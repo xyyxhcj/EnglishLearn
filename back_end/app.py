@@ -87,6 +87,26 @@ def get_records():
     return success(result, columns)
 
 
+@app.route('/get_records_by_list', methods=['post'])
+def get_records_by_list():
+    params = request.get_json()  # {'type': 2, 'list': []}
+    logger.info(params)
+    sql = 'select er.* from en_records er inner join en_list_records elr on elr.records_id=er.id where elr.list_id in ({}) '.format(
+        str(params['list'])[1:-1])
+    type = params['type']
+    if type and isinstance(type, int):
+        sql += ' and er.type = %s' % type
+    result, columns = SQLHelper.fetch_all(sql, ())
+    return success(result, columns)
+
+
+@app.route('/get_lists', methods=['post'])
+def get_lists():
+    sql = 'select * from en_list'
+    result, columns = SQLHelper.fetch_all(sql, {})
+    return success(result, columns)
+
+
 @app.route('/get_records_min_max_date', methods=['post'])
 def get_records_min_max_date():
     result, columns = SQLHelper.fetch_all('select min(er.learn_date),max(er.learn_date) from en_records er limit 1', ())
