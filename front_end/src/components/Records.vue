@@ -65,6 +65,7 @@
           </van-cell>
         </van-cell-group>
       </van-checkbox-group>
+      <div style="height: 65px"></div>
     </div>
     <van-action-bar>
       <van-action-bar-button type="warning" text="Cancel" @click="listOptionsPopup.show=false" />
@@ -311,10 +312,6 @@ export default {
 
 .content-wrapper {
   height: 94vh;
-}
-
-.bottom-btn {
-  height: 6vh;
 }
 
 </style>
