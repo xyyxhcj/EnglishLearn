@@ -90,9 +90,9 @@ def get_records():
 @app.route('/get_records_by_list', methods=['post'])
 def get_records_by_list():
     params = request.get_json()  # {'type': 2, 'list': []}
-    logger.info(params)
-    sql = 'select er.* from en_records er inner join en_list_records elr on elr.records_id=er.id where elr.list_id in ({}) '.format(
-        str(params['list'])[1:-1])
+    logger.info('params:%s, ip:%s', params, request.remote_addr)
+    sql = 'select er.* from en_records er inner join en_list_records elr on elr.records_id=er.id where elr.list_id in ({}) '\
+        .format(str(params['list'])[1:-1])
     type = params['type']
     if type and isinstance(type, int):
         sql += ' and er.type = %s' % type
@@ -102,6 +102,7 @@ def get_records_by_list():
 
 @app.route('/get_lists', methods=['post'])
 def get_lists():
+    logger.info('ip:%s, device:%s', request.remote_addr, request.user_agent.string)
     sql = 'select * from en_list'
     result, columns = SQLHelper.fetch_all(sql, {})
     return success(result, columns)
