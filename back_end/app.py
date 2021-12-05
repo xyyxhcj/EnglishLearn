@@ -15,6 +15,13 @@ def success(data, columns):
     return json.dumps({'code': 200, 'columns': columns, 'data': data, })
 
 
+def get_ip():
+    if request.headers.getlist("X-Forwarded-For"):
+        return request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        return request.remote_addr
+
+
 base_dir = os.path.dirname(os.path.abspath(__file__))
 db_path = base_dir + os.sep + '.englishLearn'
 print(db_path)
@@ -90,7 +97,7 @@ def get_records():
 @app.route('/get_records_by_list', methods=['post'])
 def get_records_by_list():
     params = request.get_json()  # {'type': 2, 'list': []}
-    logger.info('params:%s, ip:%s', params, request.remote_addr)
+    logger.info('params:%s, ip:%s', params, get_ip())
     sql = 'select er.* from en_records er inner join en_list_records elr on elr.records_id=er.id where elr.list_id in ({}) '\
         .format(str(params['list'])[1:-1])
     type = params['type']
@@ -102,7 +109,7 @@ def get_records_by_list():
 
 @app.route('/get_lists', methods=['post'])
 def get_lists():
-    logger.info('ip:%s, device:%s', request.remote_addr, request.user_agent.string)
+    logger.info('ip:%s, device:%s', get_ip(), request.user_agent.string)
     sql = 'select * from en_list'
     result, columns = SQLHelper.fetch_all(sql, {})
     return success(result, columns)
