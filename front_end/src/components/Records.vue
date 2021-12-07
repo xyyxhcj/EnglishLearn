@@ -68,10 +68,10 @@
       <div style="height: 65px"></div>
     </div>
     <van-action-bar>
-      <van-action-bar-button type="warning" text="Cancel" @click="listOptionsPopup.show=false" />
-      <van-action-bar-button text="Check All" @click="checkAll" />
-      <van-action-bar-button text="Toggle All" @click="toggleAll" />
-      <van-action-bar-button type="primary" text="OK" @click="onConfirmSelectList" />
+      <van-action-bar-button type="warning" text="Cancel" @click="listOptionsPopup.show=false"/>
+      <van-action-bar-button text="Check All" @click="checkAll"/>
+      <van-action-bar-button text="Toggle All" @click="toggleAll"/>
+      <van-action-bar-button type="primary" text="OK" @click="onConfirmSelectList"/>
     </van-action-bar>
   </van-popup>
 </template>
@@ -242,7 +242,10 @@ export default {
     const onStop = () => {
       stopPlay();
     }
-    post('/get_lists').then(resp => listOptionsPopup.options = resp.data)
+    post('/get_lists').then(resp => {
+      listOptionsPopup.options = resp.data;
+      listOptionsPopup.show = true;
+    })
     // onFlushDataList();
 
     return {
